@@ -20,4 +20,46 @@ Table y(r,i)"yield of crude oil by region and product (%)"
    PADD4      80       5       10       5
    PADD3       44      10      36       10;
    
+s(i)"Out put prices by Sales Type ($/gallon) "
+/
+Gasoline 1.854,
+Kerosene 1.827,
+Fuel oil 2.195,
+Residual 1.425
+/,
 
+Parameter t(i)"Total production for each output (gallon)"
+t(i)=y(r,i)*X(r);
+
+
+Capacity_Const(i)..
+                    
+
+
+
+
+
+
+
+
+
+
+
+ Model Refinery / all /;
+
+solve Refinery using lp maximizing z;
+
+parameter rep "reporting";
+rep("profit") =  sum(i,t(i) * s(i))
+             	-sum(r,p(r) * X(r))
+             	-sum(r,c(r) * X(r));
+
+ rep("Income from outputs") = sum(i,t(i) * s(i));	
+
+rep("Crude oil cost") = -sum(r,p(r) * X(r));
+
+rep("Processing cost") = -sum(r,c(r) * X(r));
+
+display rep;
+
+execute_unload "alldata.gdx";
