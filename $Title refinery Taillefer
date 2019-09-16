@@ -1,0 +1,12 @@
+$Title refinery Taillefer
+
+Set
+
+r "Region" /PADD4,PADD3/,
+i "Product" /Gasoline,Kerosene,Fuel oil, Residual/;
+
+Parameter 
+
+p(r)"price crude oil ($/bbl)",
+c(r)"processing cost crude oil"
+y(r,i)"yield of crude oil by region and product";
