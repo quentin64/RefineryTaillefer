@@ -3,17 +3,21 @@ $Title refinery Taillefer
 Set
 
 r "Region" /PADD4,PADD3/,
-i "Product" /Gasoline,Kerosene,Fuel oil, Residual/;
+i "Product" /Gasoline,Kerosene,Fuel, Residual/;
 
 Parameter 
 
-p(r)"price crude oil ($/bbl)",
-c(r)"processing cost crude oil"
-y(r,i)"yield of crude oil by region and product";
-a(i)"capacity constraint for each output type (gallon)"
+p(r)"price crude oil ($/bbl)"
+/PADD4 43.35
+ PADD3 53.85/
+ 
+c(r)"processing cost crude oil ($/bbl)"
+/PADD4 0.5
+PADD3 1/;
 
+Table y(r,i)"yield of crude oil by region and product (%)"
+          Gasoline  Kerosene  Fuel  Residual  
+   PADD4      80       5       10       5
+   PADD3       44      10      36       10;
+   
 
-
-Equations
-
-ObjFn"c
