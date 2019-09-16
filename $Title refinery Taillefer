@@ -10,3 +10,10 @@ Parameter
 p(r)"price crude oil ($/bbl)",
 c(r)"processing cost crude oil"
 y(r,i)"yield of crude oil by region and product";
+a(i)"capacity constraint for each output type (gallon)"
+
+
+
+Equations
+
+ObjFn"c
