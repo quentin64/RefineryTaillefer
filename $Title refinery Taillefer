@@ -34,7 +34,7 @@ Variables Z "objective function value";
 
 Equations
 ObjFn "computed objective function value"
-;
+Output_Const(i) "constraint on each output";
 
 
 
@@ -42,13 +42,13 @@ ObjFn.. Z =e= sum(i,s(i) * F(i))
              -sum(r,c(r) * X(r))
              -sum(r,p(r) * X(r));
              
-Output_Req(i)..
+Output_Const(i)..
 		sum(j,a(i,j) * Y(j)) =g= 
 		X(i);
 
-Model workshop /all/;
+Model Taillefer /all/;
 
-solve workshop using lp maximizing z;
+solve Taillefer using lp maximizing z;
 
 parameter rep "reporting";
 rep("profit") = sum(i,s(i) * F(i))
