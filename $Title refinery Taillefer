@@ -5,7 +5,12 @@ Set
 r "Input" /PADD4,PADD3/,
 i "output" /Gasoline,Kerosene,Fuel, Residual/;
 
-Parameter 
+Parameter
+
+a(i)"refinery capacity constraint of plant (gallon)"
+/Gasoline 1008000
+Kerosene 84000
+Fuel 252000/
 
 p(r)"price input ($/bbl)"
 /PADD4 43.35
@@ -16,16 +21,22 @@ c(r)"processing cost input ($/bbl)"
 PADD3 1/
 
 s(i)"output prices by sales type ($,gallon) "
- /Gasoline 1.854
- Kerosene 1.827
- Fuel 2.195
- Residual 1.425/;
+ /Gasoline 77.868
+ Kerosene 76.734
+ Fuel 92.19
+ Residual 59.85/;
  
- Table y(r,i) "yield of input by region and ouput (%)"
-          Gasoline    Kerosene      Fuel    Residual  
-   PADD4      0.80       0.05      0.10       0.05
-   PADD3       0.44      0.10      0.36       0.10;
+ 
+ Table y(i,r) "yield of input by region and ouput (%)"
+            PADD4  PADD3   
+   Gasoline  0.80   0.44    
+   Kerosene  0.05   0.10      
+   Fuel      0.10   0.36 
+   Residual  0.05   0.10;
    
+
+scalar nonzero   "Capacity constraint for fuel" /252000/;
+
 Positive Variables
 X(r) "quantity of input (bbl)",
 F(i) "production of ouput (gallon) ";
@@ -34,7 +45,8 @@ Variables Z "objective function value";
 
 Equations
 ObjFn "computed objective function value"
-Output_Const(i) "constraint on each output";
+Output_Const(i) "constraint on each output"
+Nonzero_Const(i) "Nonzero imput";
 
 
 
@@ -42,13 +54,14 @@ ObjFn.. Z =e= sum(i,s(i) * F(i))
              -sum(r,c(r) * X(r))
              -sum(r,p(r) * X(r));
              
-Output_Const(i)..
-		sum(j,a(i,j) * Y(j)) =g= 
-		X(i);
+Output_Const(i).. sum(r,y(i,r)*X(r)) =l= a(i);
 
+Nonzero_Const(i)..  nonzero =l= F(i);
+		
 Model Taillefer /all/;
 
 solve Taillefer using lp maximizing z;
+
 
 parameter rep "reporting";
 rep("profit") = sum(i,s(i) * F(i))
