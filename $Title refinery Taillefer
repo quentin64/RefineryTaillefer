@@ -10,7 +10,8 @@ Parameter
 a(i)"refinery capacity constraint of plant (gallon)"
 /Gasoline 1008000
 Kerosene 84000
-Fuel 252000/
+Fuel 252000
+Residual 0/
 
 p(r)"price input ($/bbl)"
 /PADD4 43.35
@@ -21,18 +22,18 @@ c(r)"processing cost input ($/bbl)"
 PADD3 1/
 
 s(i)"output prices by sales type ($,gallon) "
- /Gasoline 77.868
- Kerosene 76.734
- Fuel 92.19
- Residual 59.85/;
+ /Gasoline 1.854
+ Kerosene 1.827
+ Fuel 2.195
+ Residual 1.425/;
  
  
- Table y(i,r) "yield of input by region and ouput (%)"
+ Table y(i,r) "yield of input by region and ouput (gallon)"
             PADD4  PADD3   
-   Gasoline  0.80   0.44    
-   Kerosene  0.05   0.10      
-   Fuel      0.10   0.36 
-   Residual  0.05   0.10;
+   Gasoline  33.6   18.48    
+   Kerosene  2.1     4.2      
+   Fuel      4.2    15.12 
+   Residual  2.1    4.2;
    
 
 scalar nonzero   "Capacity constraint for fuel" /252000/;
@@ -54,7 +55,7 @@ ObjFn.. Z =e= sum(i,s(i) * F(i))
              -sum(r,c(r) * X(r))
              -sum(r,p(r) * X(r));
              
-Output_Const(i).. sum(r,y(i,r)*X(r)) =l= a(i);
+Output_Const(i).. sum(r,y(i,r)*X(r)) =g= a(i);
 
 Nonzero_Const(i)..  nonzero =l= F(i);
 		
@@ -62,18 +63,18 @@ Model Taillefer /all/;
 
 solve Taillefer using lp maximizing z;
 
-
 parameter rep "reporting";
-rep("profit") = sum(i,s(i) * F(i))
-             -sum(r,c(r) * X(r))
-             -sum(r,p(r) * X(r));
+rep("profit") = sum(i,s(i)*F.l(i))
+             -sum(r,c(r)*X.l(r))
+             -sum(r,p(r)*X.l(r));
 
-rep("Income from outputs") = sum(i,s(i) * F(i));	
+rep("Income from outputs") = sum(i,s(i) * F.l(i));	
 
-rep("Input cost") = -sum(r,p(r) * X(r));
+rep("Input cost") = -sum(r,p(r) * X.l(r));
 
-rep("Processing cost") = -sum(r,c(r) * X(r));
+rep("Processing cost") = -sum(r,c(r) * X.l(r));
 
 display rep;
 
 execute_unload "alldata.gdx";
+
