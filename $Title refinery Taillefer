@@ -1,80 +1,74 @@
-$Title refinery Taillefer
+$Title refinery Taillefer 2
 
-Set
-
-r "Input" /PADD4,PADD3/,
-i "output" /Gasoline,Kerosene,Fuel, Residual/;
-
-Parameter
-
-a(i)"refinery capacity constraint of plant (gallon)"
-/Gasoline 1008000
-Kerosene 84000
-Fuel 252000
-Residual 0/
-
-p(r)"price input ($/bbl)"
-/PADD4 43.35
- PADD3 53.85/
+*Policy Switches
+Scalar CAP "Switch to turn on [1] or off [0] policy constraint on the level of Co2 emissions"/0/;
  
-c(r)"processing cost input ($/bbl)"
-/PADD4 0.5
-PADD3 1/
+*turn OFF or ON policy switch
+CAP = 1;
 
-s(i)"output prices by sales type ($,gallon) "
- /Gasoline 1.854
- Kerosene 1.827
- Fuel 2.195
- Residual 1.425/;
- 
- 
- Table y(i,r) "yield of input by region and ouput (gallon)"
-            PADD4  PADD3   
-   Gasoline  33.6   18.48    
-   Kerosene  2.1     4.2      
-   Fuel      4.2    15.12 
-   Residual  2.1    4.2;
-   
+sets
+OIL crude oil Regions (Rocky Mountain and Gulf coast)
+/ PADD4,PADD3 /
 
-scalar nonzero   "Capacity constraint for fuel" /252000/;
+PRODUCTS of refinery (e.g. gasoline and diesel) / gas*diesel /;
+
+Alias
+(OIL,r),(PRODUCTS,i)
+
+Scalars
+q total product co2 / 150000 /;
+
+Parameters
+
+d(i) product's demand /gas 13200, diesel 8000 /
+s(i) product price /gas 77.28,diesel 90.3/
+b(r) marginal production co2/PADD4 7,PADD3 5/
+p(r) Costs of crude oil ($ per barrel) /PADD4 43.35,PADD3 53.85/;
+
+Table
+y(r,i) Unit of crude oil per unit of product
+        gas    diesel 
+PADD4   0.45    0.25  
+PADD3   0.5     0.3 ;
 
 Positive Variables
-X(r) "quantity of input (bbl)",
-F(i) "production of ouput (gallon) ";
+x(r) Unit of crude oil consumed in the production;
 
-Variables Z "objective function value";
+Variables
+Profit Total profit
+consumption;
 
 Equations
-ObjFn "computed objective function value"
-Output_Const(i) "constraint on each output"
-Nonzero_Const(i) "Nonzero imput";
+objective objective function
+CAPEQ refinery co2 constraint
+demand demand of product constraints;
 
+objective..
+profit =E= Sum (i,d(i)*s(i))
+        -Sum(r, p(r) * x(r));
 
+CAPEQ$CAP..
+Sum (r, b(r) * x(r) ) =L= q;
 
-ObjFn.. Z =e= sum(i,s(i) * F(i))
-             -sum(r,c(r) * X(r))
-             -sum(r,p(r) * X(r));
-             
-Output_Const(i).. sum(r,y(i,r)*X(r)) =g= a(i);
+demand(i)..
+Sum(r, y(r,i)*x(r) ) =G= d(i);
 
-Nonzero_Const(i)..  nonzero =l= F(i);
-		
-Model Taillefer /all/;
+Model Taillefer  oil refinery model
+/ ALL /;
 
-solve Taillefer using lp maximizing z;
+Solve Taillefer  Maximizing profit Using
+LP;
 
 parameter rep "reporting";
-rep("profit") = sum(i,s(i)*F.l(i))
-             -sum(r,c(r)*X.l(r))
+rep("profit") = sum(i,d(i)*s(i))
              -sum(r,p(r)*X.l(r));
 
-rep("Income from outputs") = sum(i,s(i) * F.l(i));	
+rep("Income from outputs") = sum(i,d(i) * s(i));	
 
 rep("Input cost") = -sum(r,p(r) * X.l(r));
-
-rep("Processing cost") = -sum(r,c(r) * X.l(r));
 
 display rep;
 
 execute_unload "alldata.gdx";
+
 
